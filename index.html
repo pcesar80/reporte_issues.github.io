@@ -89,12 +89,18 @@
 
   <h3>Ambiente y entorno</h3>
 
-  <label for="environment">Ambiente donde ocurrió el error:</label>
-  <input type="text" id="environment" name="environment" placeholder="Ej: Producción, Staging, Desarrollo" />
-
-  <label for="appVersion">Versión de la App/Web:</label>
-  <input type="text" id="appVersion" name="appVersion" placeholder="Ej: v2.1.4" />
-
+  <fieldset class="checkbox-group">
+    <legend>Ambiente donde ocurrió el error:</legend>
+    <label><input type="checkbox" name="Ambiente" value="Prod" /> Prod</label>
+    <label><input type="checkbox" name="Ambiente" value="Test" /> Test</label>
+    <label><input type="checkbox" name="Ambiente" value="Dev" /> Dev</label>
+    <label><input type="checkbox" name="Ambiente" value="Demo" /> Demo</label>
+  </fieldset></p>
+  <fieldset class="checkbox-group">
+    <legend>Versión de la App/Web:</legend>
+    <input type="text" id="appVersion" name="appVersion" placeholder="Ej: v2.1.4" />
+  </fieldset>
+  
   <h3>Base de datos</h3>
   <p>En caso de tener acceso a la BD, por favor enviar print o consulta SQL en la cual se vea reflejado o no el movimiento o la transacción.</p>
   <label for="dbAttachments">Adjuntar archivos (imágenes, prints):</label>
