@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Formulario de Reporte de Incidentes – CMA</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+  h2 {
+    background: #0073e6;
+    color: white;
+    padding: 8px;
+    border-radius: 5px;
+  }
+  label {
+    display: block;
+    margin: 8px 0 4px;
+    font-weight: bold;
+  }
+  input[type="text"], input[type="datetime-local"], textarea {
+    width: 100%;
+    padding: 6px;
+    box-sizing: border-box;
+    margin-bottom: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  textarea {
+    resize: vertical;
+  }
+  .checkbox-group label {
+    font-weight: normal;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .steps {
+    margin-bottom: 12px;
+  }
+  .step-item {
+    margin-bottom: 6px;
+  }
+  button {
+    background-color: #0073e6;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 12px;
+  }
+  button:hover {
+    background-color: #005bb5;
+  }
+</style>
+</head>
+<body>
+
+<h1>Formulario de Reporte de Incidentes – CMA</h1>
+
+<form id="reportForm">
+
+  <label for="issueTitle">Título referencial al issue encontrado</label>
+  <input type="text" id="issueTitle" name="issueTitle" placeholder="Ej: Error en pantalla principal" required />
+
+  <h2>Información general</h2>
+
+  <label for="datetimeTest">Fecha y hora de prueba <span style="color:red;">*</span></label>
+  <input type="datetime-local" id="datetimeTest" name="datetimeTest" required />
+
+  <label for="userContact">Nombre y contacto del usuario que lo detectó</label>
+  <input type="text" id="userContact" name="userContact" placeholder="Nombre y email o teléfono" />
+
+  <fieldset class="checkbox-group">
+    <legend>Plataformas afectadas:</legend>
+    <label><input type="checkbox" name="platforms" value="Consola Saas" /> Consola Saas</label>
+    <label><input type="checkbox" name="platforms" value="Consola Paas" /> Consola Paas</label>
+    <label><input type="checkbox" name="platforms" value="Billetera Personal" /> Billetera Personal</label>
+    <label><input type="checkbox" name="platforms" value="Billetera Comercial" /> Billetera Comercial</label>
+    <label><input type="checkbox" name="platforms" value="Link de Pago" /> Link de Pago</label>
+    <label><input type="checkbox" name="platforms" value="Comedor Saas" /> Comedor Saas</label>
+    <label><input type="checkbox" name="platforms" value="Billetera Comedor" /> Billetera Comedor</label>
+  </fieldset>
+
+  <h2>Detalles del issue detectado</h2>
+
+  <h3>Ambiente y entorno</h3>
+
+  <label for="environment">Ambiente donde ocurrió el error:</label>
+  <input type="text" id="environment" name="environment" placeholder="Ej: Producción, Staging, Desarrollo" />
+
+  <label for="appVersion">Versión de la App/Web:</label>
+  <input type="text" id="appVersion" name="appVersion" placeholder="Ej: v2.1.4" />
+
+  <h3>Base de datos</h3>
+  <p>En caso de tener acceso a la BD, por favor enviar print o consulta SQL en la cual se vea reflejado o no el movimiento o la transacción.</p>
+  <label for="dbAttachments">Adjuntar archivos (imágenes, prints):</label>
+  <input type="file" id="dbAttachments" name="dbAttachments" accept="image/*" multiple />
+
+  <h2>Pasos para reproducir el problema</h2>
+  <p>Por favor detallar paso a paso cómo fue la interacción hasta llegar al error: en lo posible si se puede agregar print de pantalla.</p>
+
+  <div id="stepsContainer" class="steps">
+    <div class="step-item">
+      <label for="step1">1.</label>
+      <input type="text" id="step1" name="steps[]" placeholder="Describir paso 1" />
+    </div>
+    <div class="step-item">
+      <label for="step2">2.</label>
+      <input type="text" id="step2" name="steps[]" placeholder="Describir paso 2" />
+    </div>
+    <div class="step-item">
+      <label for="step3">3.</label>
+      <input type="text" id="step3" name="steps[]" placeholder="Describir paso 3" />
+    </div>
+    <div class="step-item">
+      <label for="step4">4.</label>
+      <input type="text" id="step4" name="steps[]" placeholder="Describir paso 4" />
+    </div>
+  </div>
+  <button type="button" id="addStepBtn">+ Agregar paso</button>
+
+  <h2>Información técnica adicional</h2>
+  <label for="logsAvailable">¿Hay logs disponibles del lado del usuario o la app? Adjuntar si es posible.</label>
+  <textarea id="logsAvailable" name="logsAvailable" rows="3" placeholder="Describir o adjuntar logs"></textarea>
+
+  <label for="reproduceAttempt">¿Se intentó reproducir con otra cuenta/dispositivo?:</label>
+  <input type="text" id="reproduceAttempt" name="reproduceAttempt" />
+
+  <label for="patternDetected">¿Se detectó un patrón (sólo QR, sólo ciertos montos, etc)?:</label>
+  <input type="text" id="patternDetected" name="patternDetected" />
+
+  <h2>Más Adjuntos</h2>
+  <label for="moreAttachments">Adjuntar archivos (imágenes, prints):</label>
+  <input type="file" id="moreAttachments" name="moreAttachments" accept="image/*" multiple />
+
+  <button type="button" id="generatePdfBtn">Generar PDF</button>
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  // Agregar más pasos dinámicamente
+  const addStepBtn = document.getElementById('addStepBtn');
+  const stepsContainer = document.getElementById('stepsContainer');
+  let stepCount = 4;
+
+  addStepBtn.addEventListener('click', () => {
+    stepCount++;
+    const stepDiv = document.createElement('div');
+    stepDiv.className = 'step-item';
+    stepDiv.innerHTML = `
+      <label for="step\${stepCount}">\${stepCount}.</label>
+      <input type="text" id="step\${stepCount}" name="steps[]" placeholder="Describir paso \${stepCount}" />
+    `;
+    stepsContainer.appendChild(stepDiv);
+  });
+
+  // Generar PDF
+  document.getElementById('generatePdfBtn').addEventListener('click', async () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const form = document.getElementById('reportForm');
+    const formData = new FormData(form);
+
+    let y = 10;
+    const lineHeight = 10;
+    const pageHeight = doc.internal.pageSize.height;
+
+    function addText(text) {
+      if (y > pageHeight - 20) {
+        doc.addPage();
+        y = 10;
+      }
+      doc.text(text, 10, y);
+      y += lineHeight;
+    }
+
+    addText('Formulario de Reporte de Incidentes – CMA');
+    addText(' ');
+
+    addText('Título referencial: ' + formData.get('issueTitle'));
+    addText(' ');
+
+    addText('Información general');
+    addText('Fecha y hora de prueba: ' + formData.get('datetimeTest'));
+    addText('Nombre y contacto del usuario: ' + formData.get('userContact'));
+
+    // Plataformas afectadas
+    const platforms = formData.getAll('platforms');
+    addText('Plataformas afectadas: ' + (platforms.length ? platforms.join(', ') : 'Ninguna'));
+
+    addText(' ');
+    addText('Detalles del issue detectado');
+    addText('Ambiente y entorno');
+    addText('Ambiente donde ocurrió el error: ' + formData.get('environment'));
+    addText('Versión de la App/Web: ' + formData.get('appVersion'));
+
+    addText(' ');
+    addText('Base de datos');
+    addText('Por favor revisar adjuntos para evidencias.');
+
+    addText(' ');
+    addText('Pasos para reproducir el problema:');
+    const steps = formData.getAll('steps[]');
+    steps.forEach((step, i) => {
+      if (step.trim() !== '') {
+        addText((i+1) + '. ' + step);
+      }
+    });
+
+    addText(' ');
+    addText('Información técnica adicional');
+    addText('Logs disponibles: ' + formData.get('logsAvailable'));
+    addText('Intento de reproducir con otra cuenta/dispositivo: ' + formData.get('reproduceAttempt'));
+    addText('Patrón detectado: ' + formData.get('patternDetected'));
+
+    addText(' ');
+    addText('Más adjuntos: Por favor revisar archivos adjuntos.');
+
+    doc.save('Reporte_Incidentes_CMA.pdf');
+  });
+</script>
+
+</body>
+</html>
