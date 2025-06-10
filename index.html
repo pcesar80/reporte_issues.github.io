@@ -55,6 +55,24 @@
   button:hover {
     background-color: #005bb5;
   }
+  .step-item {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  /* Contenedor de las miniaturas */
+  .image-preview {
+    margin-bottom: 12px;
+  }
+
+  /* Imágenes más grandes */
+  .image-preview img {
+    max-width: 250px;
+    max-height: 250px;
+    margin: 5px 5px 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
 </style>
 </head>
 <body>
@@ -91,11 +109,12 @@
 
   <fieldset class="checkbox-group">
     <legend>Ambiente donde ocurrió el error:</legend>
-    <label><input type="checkbox" name="Ambiente" value="Prod" /> Prod</label>
-    <label><input type="checkbox" name="Ambiente" value="Test" /> Test</label>
-    <label><input type="checkbox" name="Ambiente" value="Dev" /> Dev</label>
-    <label><input type="checkbox" name="Ambiente" value="Demo" /> Demo</label>
-  </fieldset></p>
+    <label><input type="checkbox" name="environment" value="Prod" /> Prod</label>
+    <label><input type="checkbox" name="environment" value="Test" /> Test</label>
+    <label><input type="checkbox" name="environment" value="Dev" /> Dev</label>
+    <label><input type="checkbox" name="environment" value="Demo" /> Demo</label>
+  </fieldset>
+
   <fieldset class="checkbox-group">
     <legend>Versión de la App/Web:</legend>
     <input type="text" id="appVersion" name="appVersion" placeholder="Ej: v2.1.4" />
@@ -105,6 +124,7 @@
   <p>En caso de tener acceso a la BD, por favor enviar print o consulta SQL en la cual se vea reflejado o no el movimiento o la transacción.</p>
   <label for="dbAttachments">Adjuntar archivos (imágenes, prints):</label>
   <input type="file" id="dbAttachments" name="dbAttachments" accept="image/*" multiple />
+  <div id="dbAttachmentsPreview" class="image-preview"></div>
 
   <h2>Pasos para reproducir el problema</h2>
   <p>Por favor detallar paso a paso cómo fue la interacción hasta llegar al error: en lo posible si se puede agregar print de pantalla.</p>
@@ -142,6 +162,7 @@
   <h2>Más Adjuntos</h2>
   <label for="moreAttachments">Adjuntar archivos (imágenes, prints):</label>
   <input type="file" id="moreAttachments" name="moreAttachments" accept="image/*" multiple />
+  <div id="moreAttachmentsPreview" class="image-preview"></div>
 
   <button type="button" id="generatePdfBtn">Generar PDF</button>
 </form>
@@ -158,10 +179,42 @@
     const stepDiv = document.createElement('div');
     stepDiv.className = 'step-item';
     stepDiv.innerHTML = `
-      <label for="step\${stepCount}">\${stepCount}.</label>
-      <input type="text" id="step\${stepCount}" name="steps[]" placeholder="Describir paso \${stepCount}" />
+      <label for="step${stepCount}">${stepCount}.</label>
+      <input type="text" id="step${stepCount}" name="steps[]" placeholder="Describir paso ${stepCount}" />
     `;
     stepsContainer.appendChild(stepDiv);
+  });
+
+  // Mostrar miniaturas para dbAttachments
+  const dbAttachmentsInput = document.getElementById('dbAttachments');
+  const dbAttachmentsPreview = document.getElementById('dbAttachmentsPreview');
+
+  dbAttachmentsInput.addEventListener('change', () => {
+    dbAttachmentsPreview.innerHTML = ''; // limpiar
+    const files = dbAttachmentsInput.files;
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) continue;
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.onload = () => URL.revokeObjectURL(img.src);
+      dbAttachmentsPreview.appendChild(img);
+    }
+  });
+
+  // Mostrar miniaturas para moreAttachments
+  const moreAttachmentsInput = document.getElementById('moreAttachments');
+  const moreAttachmentsPreview = document.getElementById('moreAttachmentsPreview');
+
+  moreAttachmentsInput.addEventListener('change', () => {
+    moreAttachmentsPreview.innerHTML = ''; // limpiar
+    const files = moreAttachmentsInput.files;
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) continue;
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.onload = () => URL.revokeObjectURL(img.src);
+      moreAttachmentsPreview.appendChild(img);
+    }
   });
 
   // Generar PDF
@@ -202,7 +255,8 @@
     addText(' ');
     addText('Detalles del issue detectado');
     addText('Ambiente y entorno');
-    addText('Ambiente donde ocurrió el error: ' + formData.get('environment'));
+    const environments = formData.getAll('environment');
+    addText('Ambiente donde ocurrió el error: ' + (environments.length ? environments.join(', ') : 'Ninguno'));
     addText('Versión de la App/Web: ' + formData.get('appVersion'));
 
     addText(' ');
