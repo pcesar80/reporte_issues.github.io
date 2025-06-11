@@ -103,6 +103,8 @@
       <div class="group-item">
         <label>Plataformas afectadas:</label>
         <div class="checkbox-group">
+          <label><input type="checkbox" name="platforms" value="Consola Saas"> Consola Saas</label>
+          <label><input type="checkbox" name="platforms" value="Consola Paas"> Consola Paas</label>
           <label><input type="checkbox" name="platforms" value="Billetera Personal"> Billetera Personal</label>
           <label><input type="checkbox" name="platforms" value="Billetera Comercial"> Billetera Comercial</label>
           <label><input type="checkbox" name="platforms" value="Link de Pago"> Link de Pago</label>
@@ -164,121 +166,163 @@
   </form>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    const addStepBtn = document.getElementById('addStepBtn');
-    const removeStepBtn = document.getElementById('removeStepBtn');
-    const stepsContainer = document.getElementById('stepsContainer');
-    let stepCount = 1;
+<script>
+  const addStepBtn = document.getElementById('addStepBtn');
+  const removeStepBtn = document.getElementById('removeStepBtn');
+  const stepsContainer = document.getElementById('stepsContainer');
+  let stepCount = 1;
 
-    addStepBtn.addEventListener('click', () => {
-      stepCount++;
-      const stepDiv = document.createElement('div');
-      stepDiv.className = 'step-item';
-      stepDiv.innerHTML = `
-        <label for="step${stepCount}">${stepCount}.</label>
-        <input type="text" id="step${stepCount}" name="steps[]" placeholder="Describir paso ${stepCount}">
-      `;
-      stepsContainer.appendChild(stepDiv);
-    });
+  addStepBtn.addEventListener('click', () => {
+    stepCount++;
+    const stepDiv = document.createElement('div');
+    stepDiv.className = 'step-item';
+    stepDiv.innerHTML = `
+      <label for="step${stepCount}">${stepCount}.</label>
+      <input type="text" id="step${stepCount}" name="steps[]" placeholder="Describir paso ${stepCount}">
+    `;
+    stepsContainer.appendChild(stepDiv);
+  });
 
-    removeStepBtn.addEventListener('click', () => {
-      const steps = stepsContainer.querySelectorAll('.step-item');
-      if (steps.length > 1) {
-        stepsContainer.removeChild(steps[steps.length - 1]);
-        stepCount--;
-      }
-    });
-
-    function previewImages(input, container) {
-      container.innerHTML = '';
-      const files = input.files;
-      for (const file of files) {
-        if (!file.type.startsWith('image/')) continue;
-        const img = document.createElement('img');
-        img.src = URL.createObjectURL(file);
-        img.onload = () => URL.revokeObjectURL(img.src);
-        container.appendChild(img);
-      }
+  removeStepBtn.addEventListener('click', () => {
+    const steps = stepsContainer.querySelectorAll('.step-item');
+    if (steps.length > 1) {
+      stepsContainer.removeChild(steps[steps.length - 1]);
+      stepCount--;
     }
+  });
 
-    document.getElementById('dbAttachments').addEventListener('change', () => {
-      previewImages(dbAttachments, dbAttachmentsPreview);
-    });
+  function previewImages(input, container) {
+    container.innerHTML = '';
+    const files = input.files;
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) continue;
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.onload = () => URL.revokeObjectURL(img.src);
+      container.appendChild(img);
+    }
+  }
 
-    document.getElementById('moreAttachments').addEventListener('change', () => {
-      previewImages(moreAttachments, moreAttachmentsPreview);
-    });
+  document.getElementById('dbAttachments').addEventListener('change', () => {
+    previewImages(dbAttachments, dbAttachmentsPreview);
+  });
 
-    document.getElementById('generatePdfBtn').addEventListener('click', async () => {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      const formData = new FormData(document.getElementById('reportForm'));
+  document.getElementById('moreAttachments').addEventListener('change', () => {
+    previewImages(moreAttachments, moreAttachmentsPreview);
+  });
 
-      let y = 10;
-      const lineHeight = 10;
-      const pageHeight = doc.internal.pageSize.height;
+  document.getElementById('generatePdfBtn').addEventListener('click', async () => {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const formData = new FormData(document.getElementById('reportForm'));
+  const lineHeight = 7;
+  const pageHeight = doc.internal.pageSize.height;
+  const marginX = 20;
+  const contentWidth = doc.internal.pageSize.width - marginX * 2;
+  let y = 20;
 
-      function addText(text) {
-        if (y > pageHeight - 20) {
-          doc.addPage();
-          y = 10;
-        }
-        doc.text(text, 10, y);
-        y += lineHeight;
-      }
+  function addTitle(title) {
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text(title, doc.internal.pageSize.width / 2, y, { align: 'center' });
+    y += 12;
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.5);
+    doc.line(marginX, y, doc.internal.pageSize.width - marginX, y);
+    y += 10;
+  }
 
-      addText('Formulario de Reporte de Incidentes – CMA');
-      addText(' ');
-      addText('Título referencial: ' + formData.get('issueTitle'));
-      addText('Fecha y hora de prueba: ' + formData.get('datetimeTest'));
-      addText('Nombre y contacto del usuario: ' + formData.get('userContact'));
-      addText('Plataformas afectadas: ' + formData.getAll('platforms').join(', ') || 'Ninguna');
-      addText('Ambientes: ' + formData.getAll('environment').join(', ') || 'Ninguno');
-      addText('Versión App: ' + formData.get('appVersionApp'));
-      addText('Versión Web: ' + formData.get('appVersionWeb'));
-      addText(' ');
-      addText('Detalle del issue: ' + formData.get('issueDetails'));
-      addText(' ');
-      addText('Pasos para reproducir:');
-      formData.getAll('steps[]').forEach((step, i) => {
-        if (step.trim()) addText((i + 1) + '. ' + step);
+  function addSectionHeader(text) {
+    if (y + 10 > pageHeight) {
+      doc.addPage(); y = 20;
+    }
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text(text, marginX, y);
+    y += 8;
+  }
+
+  function addField(label, value) {
+    if (y + lineHeight > pageHeight) {
+      doc.addPage(); y = 20;
+    }
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'normal');
+    doc.text(`${label}`, marginX, y);
+    doc.setFont(undefined, 'bold');
+    doc.text(value || ' - ', marginX + 60, y);
+    y += lineHeight;
+  }
+
+  function addMultilineField(label, text) {
+    doc.setFont(undefined, 'normal');
+    doc.text(label, marginX, y);
+    y += lineHeight;
+    const splitText = doc.splitTextToSize(text || ' - ', contentWidth);
+    doc.setFont(undefined, 'bold');
+    doc.text(splitText, marginX, y);
+    y += splitText.length * lineHeight + 4;
+  }
+
+  addTitle('Formulario de Reporte de Incidentes – CMA');
+
+  addSectionHeader('Información general');
+  addField('Título referencial:', formData.get('issueTitle'));
+  addField('Nombre y contacto:', formData.get('userContact'));
+  const date = formData.get('datetimeTest');
+  const formattedDate = date ? new Date(date).toLocaleString('es-ES') : '';
+  addField('Fecha y hora de prueba:', formattedDate);
+
+  addField('Plataformas afectadas:', formData.getAll('platforms').join(', ') || 'Ninguna');
+  addField('Ambientes:', formData.getAll('environment').join(', ') || 'Ninguno');
+  addField('Versión App:', formData.get('appVersionApp'));
+  addField('Versión Web:', formData.get('appVersionWeb'));
+
+  addSectionHeader('Detalles del issue detectado');
+  addMultilineField('Detalle:', formData.get('issueDetails'));
+
+  addSectionHeader('Pasos para reproducir el problema');
+  const steps = formData.getAll('steps[]').filter(s => s.trim());
+  steps.forEach((s, i) => {
+    doc.setFont(undefined, 'bold');
+    doc.text(`${i + 1}. ${s}`, marginX, y);
+    y += lineHeight;
+  });
+
+  addSectionHeader('Información técnica adicional');
+  addMultilineField('Detalle técnico:', formData.get('techInfo'));
+
+  async function addImages(inputElement, label) {
+    const files = inputElement.files;
+    if (!files.length) return;
+    addSectionHeader(label);
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) continue;
+      const imgDataUrl = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.readAsDataURL(file);
       });
-      addText(' ');
-      addText('Información técnica: ' + formData.get('techInfo'));
-      addText('Intento de reproducir: ' + formData.get('reproduceAttempt'));
-      addText('Patrón detectado: ' + formData.get('patternDetected'));
 
-      async function addImagesToPdf(inputElement, title) {
-        const files = inputElement.files;
-        if (!files.length) return;
-        addText(' ');
-        addText(title);
-        for (const file of files) {
-          if (!file.type.startsWith('image/')) continue;
-          const imgDataUrl = await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.readAsDataURL(file);
-          });
-          const imgProps = doc.getImageProperties(imgDataUrl);
-          const pdfWidth = doc.internal.pageSize.getWidth() - 20;
-          const ratio = pdfWidth / imgProps.width;
-          const pdfHeight = imgProps.height * ratio;
-          if (y + pdfHeight > pageHeight - 10) {
-            doc.addPage();
-            y = 10;
-          }
-          doc.addImage(imgDataUrl, 'JPEG', 10, y, pdfWidth, pdfHeight);
-          y += pdfHeight + 10;
-        }
+      const imgProps = doc.getImageProperties(imgDataUrl);
+      const ratio = contentWidth / imgProps.width;
+      const imgHeight = imgProps.height * ratio;
+
+      if (y + imgHeight > pageHeight - 20) {
+        doc.addPage();
+        y = 20;
       }
+      doc.addImage(imgDataUrl, 'JPEG', marginX, y, contentWidth, imgHeight);
+      y += imgHeight + 10;
+    }
+  }
 
-      await addImagesToPdf(document.getElementById('dbAttachments'), 'Imágenes adjuntas – Base de Datos');
-      await addImagesToPdf(document.getElementById('moreAttachments'), 'Imágenes adjuntas – Más Adjuntos');
+  await addImages(document.getElementById('dbAttachments'), 'Imágenes adjuntas – Base de Datos');
+  await addImages(document.getElementById('moreAttachments'), 'Imágenes adjuntas – Más Adjuntos');
 
-      doc.save('Reporte_Incidentes_CMA.pdf');
-    });
-  </script>
+  doc.save('Reporte_Incidentes_CMA.pdf');
+});
+</script>
 
 </body>
 </html>
