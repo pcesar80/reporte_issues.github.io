@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Formulario de Reporte de Incidentes – CMA</title>
+  <title>Reporte de Incidentes PDT - CMA</title>
   
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
     }
-    h2 {
+    h1, h2 {
       background: #0073e6;
       color: white;
       padding: 8px;
@@ -54,6 +54,7 @@
       border-radius: 4px;
       cursor: pointer;
       margin-top: 12px;
+      margin-right: 8px;
     }
     button:hover {
       background-color: #005bb5;
@@ -65,30 +66,16 @@
       border: 1px solid #ccc;
       border-radius: 4px;
     }
-
     .group-horizontal {
       display: flex;
       gap: 40px;
       flex-wrap: wrap;
       margin-bottom: 20px;
     }
-
     .group-item {
       flex: 1;
       min-width: 250px;
     }
-
-    .checkbox-group.column {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .checkbox-group.column label {
-      display: flex;
-      align-items: center;
-    }
-
   </style>
 </head>
 <body>
@@ -104,16 +91,11 @@
     <div class="group-horizontal">
       <div class="group-item">
         <label for="userContact">Nombre y contacto del usuario:</label>
-        <div class="checkbox-group">
-          <input type="text" id="userContact" name="userContact" required>
-        </div>
+        <input type="text" id="userContact" name="userContact" required>
       </div>
-    
       <div class="group-item">
         <label for="datetimeTest">Fecha y hora de prueba:</label>
-        <div class="checkbox-group">
-          <input type="datetime-local" id="datetimeTest" name="datetimeTest" required>
-        </div>
+        <input type="datetime-local" id="datetimeTest" name="datetimeTest" required>
       </div>
     </div>
 
@@ -121,49 +103,40 @@
       <div class="group-item">
         <label>Plataformas afectadas:</label>
         <div class="checkbox-group">
-          <label><input type="checkbox" name="platforms" value="Billetera Personal" /> Billetera Personal</label>
-          <label><input type="checkbox" name="platforms" value="Billetera Comercial" /> Billetera Comercial</label>
-          <label><input type="checkbox" name="platforms" value="Link de Pago" /> Link de Pago</label>
-          <label><input type="checkbox" name="platforms" value="Comedor Saas" /> Comedor Saas</label>
-          <label><input type="checkbox" name="platforms" value="Billetera Comedor" /> Billetera Comedor</label>
+          <label><input type="checkbox" name="platforms" value="Billetera Personal"> Billetera Personal</label>
+          <label><input type="checkbox" name="platforms" value="Billetera Comercial"> Billetera Comercial</label>
+          <label><input type="checkbox" name="platforms" value="Link de Pago"> Link de Pago</label>
+          <label><input type="checkbox" name="platforms" value="Comedor Saas"> Comedor Saas</label>
+          <label><input type="checkbox" name="platforms" value="Billetera Comedor"> Billetera Comedor</label>
         </div>
       </div>
-    
       <div class="group-item">
         <label>Ambiente donde ocurrió el error:</label>
         <div class="checkbox-group">
-          <label><input type="checkbox" name="environment" value="Prod" /> Prod</label>
-          <label><input type="checkbox" name="environment" value="Test" /> Test</label>
-          <label><input type="checkbox" name="environment" value="Dev" /> Dev</label>
-          <label><input type="checkbox" name="environment" value="Demo" /> Demo</label>
+          <label><input type="checkbox" name="environment" value="Prod"> Prod</label>
+          <label><input type="checkbox" name="environment" value="Test"> Test</label>
+          <label><input type="checkbox" name="environment" value="Dev"> Dev</label>
+          <label><input type="checkbox" name="environment" value="Demo"> Demo</label>
         </div>
       </div>
     </div>
 
     <div class="group-horizontal">
       <div class="group-item">
-            <label for="appVersion">Versión de la App:</label>
-        <div class="checkbox-group">
-          <input type="text" id="appVersion" name="appVersion">
-        </div>
+        <label for="appVersionApp">Versión de la App:</label>
+        <input type="text" id="appVersionApp" name="appVersionApp">
       </div>
-    
       <div class="group-item">
-        <label for="appVersion">Versión de la Web:</label>
-        <div class="checkbox-group">
-          <input type="text" id="appVersion" name="appVersion">
-        </div>
+        <label for="appVersionWeb">Versión de la Web:</label>
+        <input type="text" id="appVersionWeb" name="appVersionWeb">
       </div>
     </div>
 
-    <h2>Datos de prueba</h2>
-
-
     <h2>Detalles del issue detectado</h2>
-      <label for="logsAvailable">Detalle del issue detectado:</label>
-      <textarea id="logsAvailable" name="logsAvailable" rows="3"></textarea>
+    <label for="issueDetails">Detalle del issue detectado:</label>
+    <textarea id="issueDetails" name="issueDetails" rows="3"></textarea>
 
-    <label>Adjuntar imágenes – Base de datos:</label>
+    <label>Adjuntar imágenes del issue:</label>
     <input type="file" id="dbAttachments" name="dbAttachments" accept="image/*" multiple>
     <div class="image-preview" id="dbAttachmentsPreview"></div>
 
@@ -179,8 +152,9 @@
 
     <h2>Información técnica adicional</h2>
 
-    <label for="logsAvailable">Información tecnica:</label>
-    <textarea id="logsAvailable" name="logsAvailable" rows="3"></textarea>
+    <label for="techInfo">Información técnica:</label>
+    <textarea id="techInfo" name="techInfo" rows="3"></textarea>
+
 
     <label>Adjuntar imágenes – Más adjuntos:</label>
     <input type="file" id="moreAttachments" name="moreAttachments" accept="image/*" multiple>
@@ -208,9 +182,9 @@
     });
 
     removeStepBtn.addEventListener('click', () => {
-      const allSteps = stepsContainer.querySelectorAll('.step-item');
-      if (allSteps.length > 1) {
-        stepsContainer.removeChild(allSteps[allSteps.length - 1]);
+      const steps = stepsContainer.querySelectorAll('.step-item');
+      if (steps.length > 1) {
+        stepsContainer.removeChild(steps[steps.length - 1]);
         stepCount--;
       }
     });
@@ -227,20 +201,18 @@
       }
     }
 
-    const dbAttachmentsInput = document.getElementById('dbAttachments');
-    const dbAttachmentsPreview = document.getElementById('dbAttachmentsPreview');
-    dbAttachmentsInput.addEventListener('change', () => previewImages(dbAttachmentsInput, dbAttachmentsPreview));
+    document.getElementById('dbAttachments').addEventListener('change', () => {
+      previewImages(dbAttachments, dbAttachmentsPreview);
+    });
 
-    const moreAttachmentsInput = document.getElementById('moreAttachments');
-    const moreAttachmentsPreview = document.getElementById('moreAttachmentsPreview');
-    moreAttachmentsInput.addEventListener('change', () => previewImages(moreAttachmentsInput, moreAttachmentsPreview));
+    document.getElementById('moreAttachments').addEventListener('change', () => {
+      previewImages(moreAttachments, moreAttachmentsPreview);
+    });
 
     document.getElementById('generatePdfBtn').addEventListener('click', async () => {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
-
-      const form = document.getElementById('reportForm');
-      const formData = new FormData(form);
+      const formData = new FormData(document.getElementById('reportForm'));
 
       let y = 10;
       const lineHeight = 10;
@@ -258,66 +230,51 @@
       addText('Formulario de Reporte de Incidentes – CMA');
       addText(' ');
       addText('Título referencial: ' + formData.get('issueTitle'));
-      addText(' ');
-      addText('Información general');
       addText('Fecha y hora de prueba: ' + formData.get('datetimeTest'));
       addText('Nombre y contacto del usuario: ' + formData.get('userContact'));
-      const platforms = formData.getAll('platforms');
-      addText('Plataformas afectadas: ' + (platforms.length ? platforms.join(', ') : 'Ninguna'));
+      addText('Plataformas afectadas: ' + formData.getAll('platforms').join(', ') || 'Ninguna');
+      addText('Ambientes: ' + formData.getAll('environment').join(', ') || 'Ninguno');
+      addText('Versión App: ' + formData.get('appVersionApp'));
+      addText('Versión Web: ' + formData.get('appVersionWeb'));
       addText(' ');
-      addText('Detalles del issue detectado');
-      const environments = formData.getAll('environment');
-      addText('Ambiente donde ocurrió el error: ' + (environments.length ? environments.join(', ') : 'Ninguno'));
-      addText('Versión de la App/Web: ' + formData.get('appVersion'));
+      addText('Detalle del issue: ' + formData.get('issueDetails'));
       addText(' ');
-      addText('Base de datos: Ver imágenes adjuntas.');
-      addText(' ');
-      addText('Pasos para reproducir el problema:');
-      const steps = formData.getAll('steps[]');
-      steps.forEach((step, i) => {
-        if (step.trim() !== '') {
-          addText((i + 1) + '. ' + step);
-        }
+      addText('Pasos para reproducir:');
+      formData.getAll('steps[]').forEach((step, i) => {
+        if (step.trim()) addText((i + 1) + '. ' + step);
       });
       addText(' ');
-      addText('Información técnica adicional');
-      addText('Logs disponibles: ' + formData.get('logsAvailable'));
-      addText('Intento de reproducir con otra cuenta/dispositivo: ' + formData.get('reproduceAttempt'));
+      addText('Información técnica: ' + formData.get('techInfo'));
+      addText('Intento de reproducir: ' + formData.get('reproduceAttempt'));
       addText('Patrón detectado: ' + formData.get('patternDetected'));
 
       async function addImagesToPdf(inputElement, title) {
         const files = inputElement.files;
-        if (!files || files.length === 0) return;
-
+        if (!files.length) return;
         addText(' ');
         addText(title);
-
         for (const file of files) {
           if (!file.type.startsWith('image/')) continue;
-
           const imgDataUrl = await new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = (e) => resolve(e.target.result);
             reader.readAsDataURL(file);
           });
-
           const imgProps = doc.getImageProperties(imgDataUrl);
           const pdfWidth = doc.internal.pageSize.getWidth() - 20;
           const ratio = pdfWidth / imgProps.width;
           const pdfHeight = imgProps.height * ratio;
-
           if (y + pdfHeight > pageHeight - 10) {
             doc.addPage();
             y = 10;
           }
-
           doc.addImage(imgDataUrl, 'JPEG', 10, y, pdfWidth, pdfHeight);
           y += pdfHeight + 10;
         }
       }
 
-      await addImagesToPdf(dbAttachmentsInput, 'Imágenes adjuntas – Base de Datos');
-      await addImagesToPdf(moreAttachmentsInput, 'Imágenes adjuntas – Más Adjuntos');
+      await addImagesToPdf(document.getElementById('dbAttachments'), 'Imágenes adjuntas – Base de Datos');
+      await addImagesToPdf(document.getElementById('moreAttachments'), 'Imágenes adjuntas – Más Adjuntos');
 
       doc.save('Reporte_Incidentes_CMA.pdf');
     });
